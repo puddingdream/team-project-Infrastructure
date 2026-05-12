@@ -1,0 +1,183 @@
+package com.startup.common.error;
+
+import com.startup.common.dto.ApiResponse;
+import com.startup.common.dto.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.time.LocalDateTime;
+
+@Slf4j
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(
+            BusinessException e,
+            HttpServletRequest request
+    ) {
+        log.warn("BusinessException: {}", e.getMessage());
+        ErrorCode errorCode = e.getErrorCode();
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(ApiResponse.fail(buildErrorResponse(errorCode, e.getMessage(), request.getRequestURI())));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e,
+            HttpServletRequest request
+    ) {
+        log.warn("MethodArgumentNotValidException: {}", e.getMessage());
+        return badRequest(firstFieldErrorMessage(e.getBindingResult(), CommonErrorCode.INVALID_INPUT_VALUE.getMessage()), request);
+    }
+
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBindException(BindException e, HttpServletRequest request) {
+        log.warn("BindException: {}", e.getMessage());
+        return badRequest(firstFieldErrorMessage(e.getBindingResult(), CommonErrorCode.INVALID_INPUT_VALUE.getMessage()), request);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConstraintViolationException(
+            ConstraintViolationException e,
+            HttpServletRequest request
+    ) {
+        log.warn("ConstraintViolationException: {}", e.getMessage());
+        String message = e.getConstraintViolations().stream()
+                .findFirst()
+                .map(violation -> violation.getMessage())
+                .orElse(CommonErrorCode.INVALID_INPUT_VALUE.getMessage());
+
+        return badRequest(message, request);
+    }
+
+    @ExceptionHandler({
+            MissingServletRequestParameterException.class,
+            MethodArgumentTypeMismatchException.class,
+            IllegalArgumentException.class
+    })
+    public ResponseEntity<ApiResponse<Void>> handleBadRequest(Exception e, HttpServletRequest request) {
+        log.warn("{}: {}", e.getClass().getSimpleName(), e.getMessage());
+        return badRequest(e.getMessage(), request);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException e,
+            HttpServletRequest request
+    ) {
+        log.warn("MaxUploadSizeExceededException: {}", e.getMessage());
+        return ResponseEntity
+                .status(CommonErrorCode.PAYLOAD_TOO_LARGE.getStatus())
+                .body(ApiResponse.fail(buildErrorResponse(
+                        CommonErrorCode.PAYLOAD_TOO_LARGE,
+                        CommonErrorCode.PAYLOAD_TOO_LARGE.getMessage(),
+                        request.getRequestURI()
+                )));
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMultipartException(MultipartException e, HttpServletRequest request) {
+        log.warn("MultipartException: {}", e.getMessage());
+        return badRequest("Invalid multipart request.", request);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResourceFoundException(
+            NoResourceFoundException e,
+            HttpServletRequest request
+    ) {
+        log.debug("NoResourceFoundException: {}", e.getMessage());
+        return ResponseEntity
+                .status(CommonErrorCode.NOT_FOUND.getStatus())
+                .body(ApiResponse.fail(buildErrorResponse(
+                        CommonErrorCode.NOT_FOUND,
+                        CommonErrorCode.NOT_FOUND.getMessage(),
+                        request.getRequestURI()
+                )));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpRequestMethodNotSupportedException(
+            HttpRequestMethodNotSupportedException e,
+            HttpServletRequest request
+    ) {
+        log.warn("HttpRequestMethodNotSupportedException: {}", e.getMessage());
+        return ResponseEntity
+                .status(CommonErrorCode.METHOD_NOT_ALLOWED.getStatus())
+                .body(ApiResponse.fail(buildErrorResponse(
+                        CommonErrorCode.METHOD_NOT_ALLOWED,
+                        e.getMessage(),
+                        request.getRequestURI()
+                )));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpMediaTypeNotSupportedException(
+            HttpMediaTypeNotSupportedException e,
+            HttpServletRequest request
+    ) {
+        log.warn("HttpMediaTypeNotSupportedException: {}", e.getMessage());
+        return ResponseEntity
+                .status(CommonErrorCode.UNSUPPORTED_MEDIA_TYPE.getStatus())
+                .body(ApiResponse.fail(buildErrorResponse(
+                        CommonErrorCode.UNSUPPORTED_MEDIA_TYPE,
+                        e.getMessage(),
+                        request.getRequestURI()
+                )));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception e, HttpServletRequest request) {
+        log.error("Unhandled exception", e);
+        return ResponseEntity
+                .internalServerError()
+                .body(ApiResponse.fail(buildErrorResponse(
+                        CommonErrorCode.INTERNAL_SERVER_ERROR,
+                        CommonErrorCode.INTERNAL_SERVER_ERROR.getMessage(),
+                        request.getRequestURI()
+                )));
+    }
+
+    private ResponseEntity<ApiResponse<Void>> badRequest(String message, HttpServletRequest request) {
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResponse.fail(buildErrorResponse(
+                        CommonErrorCode.INVALID_INPUT_VALUE,
+                        message,
+                        request.getRequestURI()
+                )));
+    }
+
+    private String firstFieldErrorMessage(org.springframework.validation.BindingResult bindingResult, String defaultMessage) {
+        if (bindingResult.getFieldError() == null || bindingResult.getFieldError().getDefaultMessage() == null) {
+            return defaultMessage;
+        }
+        return bindingResult.getFieldError().getDefaultMessage();
+    }
+
+    private ErrorResponse buildErrorResponse(ErrorCode errorCode, String message, String path) {
+        return ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(errorCode.getStatus().value())
+                .error(errorCode.getStatus().name())
+                .code(errorCode.getCode())
+                .message(message)
+                .path(path)
+                .build();
+    }
+}
