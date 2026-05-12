@@ -17,6 +17,7 @@ import java.util.Map;
 
 @Configuration
 @EnableCaching
+// RedisTemplate과 Spring Cache의 기본 직렬화/TTL 정책을 한곳에서 관리한다.
 public class RedisConfig {
 
     @Bean
@@ -27,6 +28,7 @@ public class RedisConfig {
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
         GenericJacksonJsonRedisSerializer jsonSerializer = new GenericJacksonJsonRedisSerializer(jsonMapper);
 
+        // key는 사람이 읽기 쉬운 문자열, value는 타입 정보를 포함한 JSON으로 저장한다.
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(stringSerializer);
@@ -49,6 +51,7 @@ public class RedisConfig {
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer));
 
+        // 캐시별 TTL은 기능 특성에 맞춰 별도로 조정한다.
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(Map.of(

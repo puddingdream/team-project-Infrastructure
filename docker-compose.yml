@@ -1,4 +1,5 @@
 services:
+  # 로컬 개발용 MySQL이다. 호스트 포트는 기본 33306으로 열어 로컬 MySQL 3306과 충돌을 줄인다.
   mysql:
     image: mysql:8.4
     container_name: start-up-mysql
@@ -19,6 +20,7 @@ services:
       timeout: 3s
       retries: 20
 
+  # Redis Cache와 Redisson 분산락을 함께 테스트할 수 있는 Redis 인스턴스다.
   redis:
     image: redis:8-alpine
     container_name: start-up-redis
@@ -43,6 +45,7 @@ services:
       timeout: 3s
       retries: 20
 
+  # bootJar로 만든 Spring Boot 애플리케이션 컨테이너다.
   app:
     build:
       context: .
@@ -77,6 +80,7 @@ services:
       redis:
         condition: service_healthy
 
+  # Spring Actuator의 /actuator/prometheus 메트릭을 주기적으로 수집한다.
   prometheus:
     image: prom/prometheus:v2.52.0
     container_name: start-up-prometheus
@@ -92,6 +96,7 @@ services:
       app:
         condition: service_started
 
+  # Prometheus datasource를 자동 등록해 로컬 모니터링 화면을 바로 확인한다.
   grafana:
     image: grafana/grafana:10.4.2
     container_name: start-up-grafana
@@ -108,6 +113,7 @@ services:
         condition: service_started
 
 volumes:
+  # DB/Redis/모니터링 데이터는 컨테이너 삭제 후에도 유지된다. 초기화가 필요하면 docker compose down -v를 사용한다.
   start-up-mysql-data:
   start-up-redis-data:
   start-up-prometheus-data:

@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
+// Example 엔티티의 @SQLDelete/@SQLRestriction 동작을 실제 Repository 호출로 검증한다.
 class ExampleRepositoryTest {
 
     @Autowired

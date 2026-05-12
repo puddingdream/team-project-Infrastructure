@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+// QueryDSL 동적 검색 조건과 정렬 생성을 단순화하는 공통 유틸이다.
+// null predicate는 QueryDSL where(...)에서 무시되므로 선택 검색 조건을 만들 때 사용한다.
 public final class QuerydslUtils {
 
     private QuerydslUtils() {
@@ -25,6 +27,7 @@ public final class QuerydslUtils {
             Map<String, Expression<?>> sortMap,
             OrderSpecifier<?> defaultSort
     ) {
+        // sortMap에 등록한 컬럼만 정렬을 허용해 임의 필드 정렬 요청을 막는다.
         List<OrderSpecifier<?>> orders = new ArrayList<>();
         for (Sort.Order order : sort) {
             Expression<?> expression = sortMap.get(order.getProperty());

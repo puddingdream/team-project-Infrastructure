@@ -22,10 +22,12 @@ configurations {
 
 repositories {
     mavenCentral()
+    // Spring AI milestone 버전을 사용하므로 Spring milestone repository가 필요하다.
     maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
+    // Spring Boot 기본 웹/API 운영 의존성
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-aspectj'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
@@ -34,9 +36,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
+    // 기본값은 AI model을 none으로 두고, 기능을 붙일 때 OpenAI provider를 켠다.
     implementation platform('org.springframework.ai:spring-ai-bom:2.0.0-M6')
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 
+    // QueryDSL, Redis 분산락, Swagger/OpenAPI
     implementation 'io.github.openfeign.querydsl:querydsl-jpa:7.0'
     implementation 'org.apache.commons:commons-pool2'
     implementation 'org.redisson:redisson:4.3.1'
@@ -72,11 +76,13 @@ tasks.withType(JavaCompile).configureEach {
 
 def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
 def dockerComposeCommand = { String arguments ->
+    // IntelliJ/터미널이 Windows와 Unix 계열 어디서 실행돼도 같은 Gradle task를 쓰게 한다.
     isWindows
             ? ['cmd', '/c', "docker compose ${arguments}"]
             : ['sh', '-c', "docker compose ${arguments}"]
 }
 
+// 팀원이 Docker 명령을 외우지 않아도 Gradle 창에서 compose stack을 제어할 수 있게 둔 task들이다.
 tasks.register('composeUp', Exec) {
     group = 'docker'
     description = 'Build bootJar and start the Docker Compose stack.'

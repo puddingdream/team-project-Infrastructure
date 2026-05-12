@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
 @Schema(description = "Example 응답")
+// Entity를 그대로 노출하지 않고 API 응답 전용 DTO로 변환한다.
 public record ExampleResponse(
         @Schema(description = "식별자", example = "1")
         Long id,
@@ -29,6 +30,7 @@ public record ExampleResponse(
         LocalDateTime updatedAt
 ) {
     public static ExampleResponse from(Example example) {
+        // enum name과 사용자 표시용 label을 함께 내려 프론트/앱에서 선택적으로 사용할 수 있게 한다.
         return new ExampleResponse(
                 example.getId(),
                 example.getTitle(),

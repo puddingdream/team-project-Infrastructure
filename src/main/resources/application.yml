@@ -3,6 +3,7 @@ server:
 
 spring:
   config:
+    # 로컬 개발자는 .env만 만들면 yml을 수정하지 않고 환경값을 덮어쓸 수 있다.
     import: optional:file:.env[.properties]
   application:
     name: start-up
@@ -14,10 +15,12 @@ spring:
       max-file-size: ${MULTIPART_MAX_FILE_SIZE:10MB}
       max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:12MB}
   jpa:
+    # OSIV를 끄고 서비스 트랜잭션 안에서 필요한 연관관계를 명시적으로 조회한다.
     open-in-view: false
   data:
     redis:
       repositories:
+        # RedisRepository를 쓰지 않으므로 Spring Data Redis repository 스캔을 끈다.
         enabled: false
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
@@ -30,6 +33,7 @@ spring:
           min-idle: ${REDIS_POOL_MIN_IDLE:1}
   ai:
     model:
+      # none이면 provider bean을 만들지 않아 OPENAI_API_KEY 없이도 서버가 부팅된다.
       chat: ${SPRING_AI_MODEL_CHAT:none}
       embedding: ${SPRING_AI_MODEL_EMBEDDING:none}
       image: ${SPRING_AI_MODEL_IMAGE:none}
@@ -45,12 +49,14 @@ management:
   endpoints:
     web:
       exposure:
+        # Prometheus가 메트릭을 긁어갈 수 있도록 prometheus endpoint를 노출한다.
         include: health, info, metrics, prometheus
   endpoint:
     health:
       show-details: when_authorized
 
 springdoc:
+  # Swagger UI: http://localhost:8080/swagger-ui.html
   swagger-ui:
     path: /swagger-ui.html
     display-request-duration: true
@@ -66,6 +72,7 @@ logging:
 
 app:
   cors:
+    # 브라우저/WebView 로컬 테스트용 CORS 허용 목록이다. Native Android 앱은 CORS 영향을 받지 않는다.
     allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:[*],http://127.0.0.1:[*],http://10.0.2.2:[*],http://192.168.*.*:[*]}
     allowed-methods: ${CORS_ALLOWED_METHODS:GET,POST,PUT,PATCH,DELETE,OPTIONS}
     allowed-headers: ${CORS_ALLOWED_HEADERS:*}

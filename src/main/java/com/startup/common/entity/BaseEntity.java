@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
+// 모든 JPA 엔티티가 공유하는 생성/수정/삭제 시각 필드다.
+// soft delete를 쓰는 엔티티는 @SQLDelete와 @SQLRestriction을 함께 선언한다.
 public abstract class BaseEntity {
 
     @CreatedDate
@@ -29,6 +31,7 @@ public abstract class BaseEntity {
 
     @PreRemove
     protected void preRemove() {
+        // @SQLDelete 실행 시 현재 영속성 컨텍스트의 엔티티 상태도 삭제 상태로 맞춘다.
         this.deletedAt = LocalDateTime.now();
     }
 

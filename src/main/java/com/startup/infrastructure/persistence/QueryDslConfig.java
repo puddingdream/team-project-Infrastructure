@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+// Repository 구현체에서 주입받아 QueryDSL 쿼리를 만들 때 쓰는 공통 JPAQueryFactory다.
 public class QueryDslConfig {
 
     @PersistenceContext

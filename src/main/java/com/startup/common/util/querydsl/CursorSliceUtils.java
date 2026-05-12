@@ -9,6 +9,7 @@ import com.querydsl.core.types.dsl.NumberPath;
 
 import java.time.LocalDateTime;
 
+// QueryDSL cursor pagination에서 반복되는 limit, cursor 조건, 정렬 생성을 모아둔 유틸이다.
 public final class CursorSliceUtils {
 
     private CursorSliceUtils() {
@@ -43,6 +44,7 @@ public final class CursorSliceUtils {
             NumberPath<Long> idPath,
             Long idCursor
     ) {
+        // 정렬 기준 값이 같은 row는 id를 보조 cursor로 사용해 중복/누락을 줄인다.
         if (scoreCursor == null || idCursor == null) {
             return null;
         }

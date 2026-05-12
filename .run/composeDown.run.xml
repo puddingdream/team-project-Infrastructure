@@ -1,4 +1,5 @@
 <component name="ProjectRunConfigurationManager">
+  <!-- IntelliJ 상단 실행 목록에서 Docker Compose stack을 종료하기 위한 Gradle Run Configuration이다. -->
   <configuration default="false" name="composeDown" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="externalProjectPath" value="$PROJECT_DIR$" />

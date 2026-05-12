@@ -1,5 +1,7 @@
 # Android 앱 연동 메모
 
+<!-- 백엔드를 Android 네이티브 앱에서 호출할 때 헷갈리는 로컬 주소와 CORS 차이를 정리한다. -->
+
 Android 앱은 Spring Boot 서버를 그대로 REST API 서버로 사용하면 됩니다. 웹처럼 화면을 서버에서 렌더링하는 방식이 아니라, Android 앱이 HTTP 요청을 보내고 JSON 응답을 받는 구조입니다.
 
 ## 로컬 서버 주소

@@ -7,6 +7,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+// 브라우저/WebView 로컬 개발을 위한 전역 CORS 설정이다.
+// Native Android HTTP 클라이언트는 CORS 대상이 아니지만, Swagger/웹 프론트 테스트를 위해 유지한다.
 public class WebMvcConfig implements WebMvcConfigurer {
 
     @Value("${app.cors.allowed-origin-patterns}")

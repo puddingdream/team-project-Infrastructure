@@ -23,6 +23,7 @@ import org.hibernate.annotations.SQLRestriction;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE examples SET deleted_at = current_timestamp WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
+// CRUD, enum 상태, soft delete 사용 방식을 보여주는 팀 컨벤션 예제 엔티티다.
 public class Example extends BaseEntity {
 
     @Id
@@ -41,6 +42,7 @@ public class Example extends BaseEntity {
 
     @Builder
     private Example(String title, String content, ExampleStatus status) {
+        // 생성 API에서 status를 생략하면 임시 저장 상태로 시작한다.
         this.title = title;
         this.content = content;
         this.status = status == null ? ExampleStatus.DRAFT : status;

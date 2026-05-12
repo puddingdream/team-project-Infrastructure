@@ -30,6 +30,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/examples")
+// 팀원이 Controller 응답 형식, validation, Swagger 문서화 방식을 맞춰 볼 수 있는 예제다.
 public class ExampleController {
 
     private final ExampleService exampleService;

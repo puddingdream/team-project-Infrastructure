@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @RestControllerAdvice
+// 컨트롤러 밖으로 올라온 예외를 ApiResponse.fail(...) 형식으로 통일한다.
+// 예상 가능한 비즈니스/검증 오류는 warn, 알 수 없는 서버 오류는 error로 남긴다.
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
@@ -164,6 +166,7 @@ public class GlobalExceptionHandler {
     }
 
     private String firstFieldErrorMessage(org.springframework.validation.BindingResult bindingResult, String defaultMessage) {
+        // Bean Validation 오류가 여러 개여도 클라이언트에는 가장 먼저 잡힌 필드 메시지만 내려준다.
         if (bindingResult.getFieldError() == null || bindingResult.getFieldError().getDefaultMessage() == null) {
             return defaultMessage;
         }

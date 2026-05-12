@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @Schema(description = "Example 생성 요청")
+// 요청 DTO는 record로 만들고, 입력 검증은 Bean Validation annotation에 모은다.
 public record ExampleCreateRequest(
         @Schema(description = "제목", example = "첫 번째 예제")
         @NotBlank(message = "제목은 필수입니다.")

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @Schema(description = "Example 수정 요청")
+// PUT 예제이므로 수정에 필요한 값을 명시적으로 모두 받는다.
 public record ExampleUpdateRequest(
         @Schema(description = "제목", example = "수정된 예제")
         @NotBlank(message = "제목은 필수입니다.")

@@ -18,6 +18,8 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+// 트랜잭션 경계와 도메인 규칙을 담당하는 계층이다.
+// Controller는 요청/응답 조립에 집중하고, 조회 공통 로직은 ExampleReader로 분리한다.
 public class ExampleService {
 
     private final ExampleRepository exampleRepository;
@@ -84,6 +86,7 @@ public class ExampleService {
     }
 
     private void validateTitleNotDuplicated(String title) {
+        // soft delete된 row는 @SQLRestriction 때문에 중복 검사 대상에서 제외된다.
         if (exampleRepository.existsByTitle(title)) {
             throw new ExampleException(ExampleErrorCode.DUPLICATED_EXAMPLE_TITLE);
         }

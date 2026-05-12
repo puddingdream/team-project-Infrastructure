@@ -1,5 +1,7 @@
 # Docker 실행 문서
 
+<!-- README가 길어지지 않도록 Docker 실행과 문제 해결 절차를 이 문서에 모아둔다. -->
+
 이 문서는 `scripts/compose-up.sh` 또는 IntelliJ Run Configuration 실행 중 에러가 났을 때 확인하는 용도입니다.
 
 ## 빠른 실행

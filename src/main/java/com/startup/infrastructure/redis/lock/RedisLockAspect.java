@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 @Aspect
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
+// @RedisLock이 붙은 메서드 실행 전후로 Redisson 분산락을 획득/해제한다.
 public class RedisLockAspect {
 
     private final LockService lockService;
@@ -45,6 +46,7 @@ public class RedisLockAspect {
     }
 
     private String resolveKey(ProceedingJoinPoint joinPoint, String keyExpression) {
+        // SpEL에서 #memberId, #p0, #a0 같은 방식으로 메서드 파라미터를 참조할 수 있게 한다.
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         Object[] args = joinPoint.getArgs();

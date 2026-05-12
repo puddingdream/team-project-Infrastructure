@@ -6,6 +6,8 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+// GlobalExceptionHandler가 내려주는 표준 에러 바디다.
+// 프론트/앱에서는 code를 기준으로 분기하고 message는 사용자 안내에 활용한다.
 @Getter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)

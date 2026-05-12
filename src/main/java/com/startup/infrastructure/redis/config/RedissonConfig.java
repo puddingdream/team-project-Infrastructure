@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.util.StringUtils;
 
 @Configuration
+// 분산락이 필요한 시점에만 RedissonClient를 생성하도록 @Lazy로 둔다.
 public class RedissonConfig {
 
     @Bean(destroyMethod = "shutdown")
@@ -21,6 +22,7 @@ public class RedissonConfig {
             @Value("${spring.data.redis.password:}") String password
     ) {
         Config config = new Config();
+        // docker profile에서는 host=redis, local profile에서는 host=localhost를 사용한다.
         SingleServerConfig singleServerConfig = config.useSingleServer()
                 .setAddress("redis://" + host + ":" + port);
 
