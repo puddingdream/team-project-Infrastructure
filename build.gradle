@@ -22,15 +22,25 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-aspectj'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
+    implementation platform('org.springframework.ai:spring-ai-bom:2.0.0-M6')
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+
     implementation 'io.github.openfeign.querydsl:querydsl-jpa:7.0'
+    implementation 'org.apache.commons:commons-pool2'
+    implementation 'org.redisson:redisson:4.3.1'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
@@ -45,6 +55,7 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -57,4 +68,40 @@ tasks.named('test') {
 
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.add('-parameters')
+}
+
+def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+def dockerComposeCommand = { String arguments ->
+    isWindows
+            ? ['cmd', '/c', "docker compose ${arguments}"]
+            : ['sh', '-c', "docker compose ${arguments}"]
+}
+
+tasks.register('composeUp', Exec) {
+    group = 'docker'
+    description = 'Build bootJar and start the Docker Compose stack.'
+    dependsOn tasks.named('bootJar')
+    workingDir rootDir
+    commandLine dockerComposeCommand('up -d --build')
+}
+
+tasks.register('composeDown', Exec) {
+    group = 'docker'
+    description = 'Stop the Docker Compose stack.'
+    workingDir rootDir
+    commandLine dockerComposeCommand('down')
+}
+
+tasks.register('composePs', Exec) {
+    group = 'docker'
+    description = 'Show Docker Compose container status.'
+    workingDir rootDir
+    commandLine dockerComposeCommand('ps')
+}
+
+tasks.register('composeLogs', Exec) {
+    group = 'docker'
+    description = 'Tail Docker Compose logs.'
+    workingDir rootDir
+    commandLine dockerComposeCommand('logs -f --tail=100')
 }

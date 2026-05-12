@@ -1,0 +1,17 @@
+.git
+.gradle
+.idea
+out
+*.iml
+
+src
+gradle
+HELP.md
+README.md
+
+build/classes
+build/generated
+build/reports
+build/resources
+build/test-results
+build/tmp
